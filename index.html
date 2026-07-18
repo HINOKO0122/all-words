@@ -149,19 +149,21 @@
             <a class="btn-dict" href="https://www.google.com/search?q=${encodeURIComponent(word)}+意味" target="_blank" style="margin-top:0;">🔍 Googleで意味を調べる</a>
         </div>
         
-        <!-- 検索時点で自動表示される画像エリア -->
+        <!-- 自動表示される画像エリア -->
         <div id="imageResultArea" style="text-align: center; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed #cbd5e1;">
             <canvas id="wordCanvas" width="600" height="315" style="display:none;"></canvas>
             <img id="outputImage" src="" alt="生成画像" style="max-width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
             
-            <p style="font-size: 13px; color: #475569; font-weight: bold; margin: 10px 0 5px;">
-                👆 上の画像を長押し、または右クリックで保存してください
-            </p>
+            <!-- ✨ 追加：ファイル名を指定してダウンロードできる専用ボタン -->
+            <div style="margin-top: 15px; margin-bottom: 15px;">
+                <a id="btnDownload" href="#" download="" style="display: inline-block; padding: 10px 20px; font-size: 14px; background: #10b981; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">📥 画像を保存する (Noと単語の名前に設定済)</a>
+            </div>
+            
             <p style="font-size: 12px; color: #64748b; margin: 0 0 15px; line-height: 1.4;">
                 保存ができたら、下のボタンから𝕏（Twitter）を開いて、<br>いま保存した画像を添付してポストできます！
             </p>
             
-            <!-- X共有ボタン（案内を読んでから自分のタイミングで押せる） -->
+            <!-- X共有ボタン -->
             <a id="btnXPost" href="#" target="_blank" style="display: inline-block; padding: 10px 20px; font-size: 14px; background: #000; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">𝕏 画像を添付してポストする</a>
         </div>
     </div>
@@ -224,43 +226,6 @@ setTimeout(() => {
     return canvas.toDataURL("image/png");
 }
         
-function drawCanvas(word, no) {
-    const canvas = document.getElementById("wordCanvas");
-    const ctx = canvas.getContext("2d");
-
-    // 背景グラデーション
-    const gradient = ctx.createLinearGradient(0, 0, 600, 315);
-    gradient.addColorStop(0, '#eff6ff');
-    gradient.addColorStop(1, '#dbeafe');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 600, 315);
-
-    // 飾り枠線
-    ctx.strokeStyle = '#3b82f6';
-    ctx.lineWidth = 8;
-    ctx.strokeRect(20, 20, 560, 275);
-
-    // タイトルとNo
-    ctx.fillStyle = '#64748b';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText('📚 全単語辞典 Archives', 40, 55);
-
-    ctx.fillStyle = '#3b82f6';
-    ctx.font = 'bold 20px sans-serif';
-    ctx.fillText('No.' + no, 40, 100);
-
-    // 単語を中央に
-    ctx.fillStyle = '#1e293b';
-    ctx.font = 'bold 50px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(word, 300, 175);
-
-    return canvas.toDataURL("image/png");
-}
-
 // 検索時に自動で画像をセットし、Xのリンクを作成しておく関数
 function setupWordImageAndLink(word, no) {
     // 1. 画像を作成してimgタグに反映
@@ -268,8 +233,15 @@ function setupWordImageAndLink(word, no) {
     const outputImg = document.getElementById("outputImage");
     if (outputImg) outputImg.src = imgUrl;
 
-    // 2. X（Twitter）用のリンクをあらかじめ作成してボタンに仕込んでおく
-    const tweetText = `全単語辞典で「No.${no} ${word}」を調べました！\n#全単語辞典\n`;
+    // 2. ✨ 追加：ダウンロードボタンの設定（ファイル名を「No.◯◯_単語.png」にする）
+    const btnDownload = document.getElementById("btnDownload");
+    if (btnDownload) {
+        btnDownload.href = imgUrl;
+        btnDownload.download = `No.${no}_${word}.png`; // ここでファイル名を指定しています！
+    }
+
+    // 3. X（Twitter）用のリンクを作成してボタンに仕込んでおく
+    const tweetText = `全言葉辞典で「No.${no} ${word}」を調べました！\n#全言葉辞典\n`;
     const siteUrl = window.location.href;
     const xUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(siteUrl)}`;
     
