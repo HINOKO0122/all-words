@@ -33,7 +33,7 @@
     </div>
 
     <div id="targetWordArea"></div>
-    <h2 style="font-size: 18px; color: #475569; margin-top: 30px;">辞典一覧（No.1「あ」 〜 No.6806「ーー」まで常時表示）</h2>
+    <h2 style="font-size: 18px; color: #475569; margin-top: 30px;">辞典一覧</h2>
     <div class="word-list" id="wordList"></div>
 
     <script>
@@ -42,7 +42,7 @@
 
         let currentLoadedCount = 0;
         const LOAD_CHUNK = 50; 
-        const maxDisplayCount = 6806; // 「ーー」までの語数
+        const maxDisplayCount = 10**100; 
 
         // ナンバーから単語を作る
         function getWordFromNo(no) {
