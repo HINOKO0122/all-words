@@ -3,46 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>すべての単語が集まるサイト</title>
+    <title>全言葉辞典</title>
     <style>
-        body { font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9; }
-        .search-box { position: sticky; top: 0; background: #f9f9f9; padding: 10px 0; border-bottom: 20px solid #f9f9f9; z-index: 100; }
-        input { width: 70%; padding: 10px; font-size: 16px; }
-        button { padding: 10px; font-size: 16px; cursor: pointer; }
+        body { font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f4f6f9; color: #333; }
+        h1 { text-align: center; color: #2c3e50; font-size: 28px; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 30px; font-size: 14px; }
+        .search-box { position: sticky; top: 0; background: #f4f6f9; padding: 15px 0; border-bottom: 2px solid #e2e8f0; z-index: 100; display: flex; gap: 10px; }
+        input { flex: 1; padding: 12px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 8px; outline: none; }
+        input:focus { border-color: #3b82f6; }
+        button { padding: 12px 20px; font-size: 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #2563eb; }
         .word-list { margin-top: 20px; }
-        .word-item { padding: 10px; background: white; margin-bottom: 8px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .word-item.highlight { background: #fff9c4; border: 2px solid #fbc02d; }
-        .no { font-weight: bold; color: #007bff; }
-        .date { font-size: 12px; color: #888; margin-left: 10px; }
-        .word { font-size: 20px; display: block; margin-top: 5px; font-weight: bold; }
+        .word-item { padding: 15px; background: white; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-left: 5px solid #cbd5e1; }
+        .word-item.highlight { background: #eff6ff; border-left-color: #3b82f6; }
+        .no { font-weight: bold; color: #3b82f6; font-size: 14px; }
+        .word { font-size: 24px; display: block; margin: 8px 0; font-weight: bold; letter-spacing: 1px; }
+        .btn-dict { display: inline-block; margin-top: 8px; padding: 6px 12px; font-size: 12px; background: #10b981; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; }
+        .btn-dict:hover { background: #059669; }
+        .related-section { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e2e8f0; }
+        .related-title { font-size: 13px; font-weight: bold; color: #475569; margin-bottom: 5px; }
+        .related-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .related-tag { background: #f1f5f9; padding: 4px 8px; border-radius: 4px; font-size: 13px; color: #334155; text-decoration: none; }
+        .related-tag:hover { background: #e2e8f0; }
     </style>
 </head>
 <body>
 
+    <h1>📚 全言葉辞典</h1>
+    <div class="subtitle">すべてのひらがなの組み合わせを網羅したアーカイブ</div>
+
     <div class="search-box">
-        <input type="text" id="searchInput" placeholder="調べたい単語を入力（例：あい）">
-        <button onclick="searchWord()">検索してワープ</button>
+        <input type="text" id="searchInput" placeholder="単語（例: あい）または 番号（例: 500）を入力">
+        <button onclick="searchWord()">検索</button>
     </div>
 
     <div id="targetWordArea"></div>
-    <h2>今日までに追加された単語一覧</h2>
+    <h2 style="font-size: 18px; color: #475569; margin-top: 30px;">辞典一覧（No.1 〜 No.7482 ーー まで常時表示）</h2>
     <div class="word-list" id="wordList"></div>
 
     <script>
-        // 1. 使用する全文字（86文字）
         const CHARS = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉっゃゅょゎー";
         const BASE = BigInt(CHARS.length);
 
-        // 2. サイトの開始日を設定（例: 2026年7月1日）
-        const START_DATE = new Date("2026-07-01T00:00:00"); 
-        const WORDS_PER_DAY = 10000;
-
-        // 無限スクロール用の管理変数
         let currentLoadedCount = 0;
-        const LOAD_CHUNK = 200; // 1回に読み込む件数
-        let maxDisplayCount = 7482; // 最低でもNo.7482までは表示する
+        const LOAD_CHUNK = 200; 
+        const maxDisplayCount = 7482; // 「ーー」までの語数
 
-        // 数値(No)から単語を逆算する関数
+        // ナンバーから言葉を作る
         function getWordFromNo(no) {
             let n = BigInt(no) - 1n;
             let word = "";
@@ -62,7 +69,7 @@
             return word;
         }
 
-        // 単語から数値(No)を逆算する関数
+        // 言葉からナンバーを作る
         function getNoFromWord(word) {
             let no = 0n;
             let len = BigInt(word.length);
@@ -83,99 +90,124 @@
             return no + current + 1n;
         }
 
-        // 日付計算
-        function getDateFromNo(no) {
-            const daysSinceStart = Math.floor(Number((BigInt(no) - 1n) / BigInt(WORDS_PER_DAY)));
-            const targetDate = new Date(START_DATE);
-            targetDate.setDate(START_DATE.getDate() + daysSinceStart);
-            return targetDate.toLocaleDateString("ja-JP");
-        }
-
-        // 現在の「日付上の最大公開数」と「リクエストの7482」の大きい方を基準にする
-        function追加された総数を計算() {
-            const now = new Date();
-            const diffTime = Math.max(0, now - START_DATE);
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            const dateTotal = (diffDays + 1) * WORDS_PER_DAY;
+        // 入力された文字を含む、意味のある日本語の候補を簡易的に生成する機能
+        function getMeaningfulWords(keyword) {
+            // 代表的な日本語の接尾語や、よくある言葉の組み合わせパターン
+            const templates = ["言葉", "辞典", "日記", "未来", "世界", "科学", "自然", "人間", "学校", "時間", "自由", "平和"];
+            const results = [];
             
-            // 日付の計算結果が7482より小さくても、強制的に7482までは表示対象にする
-            return Math.max(maxDisplayCount, dateTotal);
+            // 1. その言葉そのもの
+            results.push(keyword);
+            // 2. 前後に一般的な言葉をくっつけて「意味のある言葉の組み合わせ」をシミュレート
+            results.push(keyword + "する");
+            results.push(keyword + "の謎");
+            
+            if(keyword.length <= 2) {
+                templates.slice(0, 4).forEach(t => {
+                    results.push(keyword + t);
+                    results.push(t + keyword);
+                });
+            }
+            return [...new Set(results)]; // 重複削除
         }
 
-        // 単語を少しずつ追加して表示する（軽さキープのため）
+        // 一覧表示（無限スクロール）
         function loadMoreWords() {
-            const totalWords = 追加された総数を計算();
-            if (currentLoadedCount >= totalWords) return;
+            if (currentLoadedCount >= maxDisplayCount) return;
 
             const listContainer = document.getElementById("wordList");
             let html = "";
             
-            // 今回読み込む範囲を決定（1から順に上から並べます）
             const start = currentLoadedCount + 1;
-            const end = Math.min(totalWords, currentLoadedCount + LOAD_CHUNK);
+            const end = Math.min(maxDisplayCount, currentLoadedCount + LOAD_CHUNK);
 
             for (let i = start; i <= end; i++) {
                 const word = getWordFromNo(i);
-                const dateStr = getDateFromNo(i);
                 html += `
                     <div class="word-item" id="word-${word}">
                         <span class="no">No.${i}</span>
-                        <span class="date">追加日: ${dateStr}</span>
                         <span class="word">${word}</span>
+                        <a class="btn-dict" href="https://www.google.com/search?q=${encodeURIComponent(word)}+意味" target="_blank">🔍 この言葉の意味を検索</a>
                     </div>
                 `;
             }
             
-            // 既存のリストの後ろに付け足す
             listContainer.insertAdjacentHTML('beforeend', html);
             currentLoadedCount = end;
         }
 
-        // スクリュー監視（一番下まで来たら追加読み込み）
         window.addEventListener('scroll', () => {
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
                 loadMoreWords();
             }
         });
 
-        // 検索＆ワープ機能
+        // 検索＆ワープ処理
         function searchWord() {
             const input = document.getElementById("searchInput").value.trim();
             if (!input) return;
 
-            const no = getNoFromWord(input);
-            if (no === -1n) {
-                alert("使用できない文字が含まれています。");
-                return;
+            let no = 0n;
+            let word = "";
+
+            // 数字か文字かを判定
+            if (/^\d+$/.test(input)) {
+                // 数字（No）で検索された場合
+                no = BigInt(input);
+                word = getWordFromNo(no);
+            } else {
+                // 文字（単語）で検索された場合
+                word = input;
+                no = getNoFromWord(word);
+                if (no === -1n) {
+                    alert("辞典に含まれない文字（漢字、カタカナ、アルファベット等）が含まれています。ひらがな・濁音・半濁音・小文字・ー のみで入力してください。");
+                    return;
+                }
             }
 
-            const dateStr = getDateFromNo(no);
-            const totalWords = BigInt(追加された総数を計算());
+            // 「その言葉が含まれていて、意味のある言葉」のリストを生成
+            const meaningfulList = getMeaningfulWords(word);
+            let relatedHtml = "";
+            
+            meaningfulList.forEach(w => {
+                const wNo = getNoFromWord(w);
+                if (wNo !== -1n) {
+                    relatedHtml += `<a href="#" class="related-tag" onclick="injectAndSearch('${w}'); return false;">${w} (No.${wNo})</a>`;
+                } else {
+                    // 漢字などが混ざったリアルな言葉はGoogleへの直接リンクにする
+                    relatedHtml += `<a href="https://www.google.com/search?q=${encodeURIComponent(w)}+意味" target="_blank" class="related-tag" style="background:#e0f2fe;">${w} ↗</a>`;
+                }
+            });
 
             const targetArea = document.getElementById("targetWordArea");
-            
-            let statusText = "";
-            if (no > totalWords) {
-                statusText = `<span style="color:orange;">⚠️ 未来に追加される予定の単語です</span>`;
-            } else {
-                statusText = `<span style="color:green;">✓ リスト内に存在する単語です</span>`;
-            }
-
             targetArea.innerHTML = `
-                <h2>検索結果 (ここにワープしました)</h2>
+                <h2 style="font-size: 18px; color: #3b82f6; margin-top: 20px;">🔍 検索結果へワープしました</h2>
                 <div class="word-item highlight">
                     <span class="no">No.${no}</span>
-                    <span class="date">追加（予定）日: ${dateStr}</span>
-                    <span class="word">${input}</span>
-                    <div style="margin-top:5px; font-size:14px;">${statusText}</div>
+                    <span class="word">${word}</span>
+                    <a class="btn-dict" href="https://www.google.com/search?q=${encodeURIComponent(word)}+意味" target="_blank">🔍 Googleで「${word}」の意味を調べる</a>
+                    <a class="btn-dict" href="https://dictionary.goo.ne.jp/srch/all/${encodeURIComponent(word)}/m0u/" target="_blank" style="background:#ea580c;">📖 goo辞書で調べる</a>
+                    
+                    <div class="related-section">
+                        <div class="related-title">💡 「${word}」が含まれる・関連する言葉の例:</div>
+                        <div class="related-tags">
+                            ${relatedHtml}
+                        </div>
+                    </div>
                 </div>
-                <hr style="border:1px solid #ccc; margin:20px 0;">
+                <hr style="border:0; height:1px; background:#cbd5e1; margin:30px 0;">
             `;
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // 初期表示（最初の数回分をロードしてスクロールバーを出す）
+        // 関連キーワードをクリックしたときに再検索する用の関数
+        function injectAndSearch(word) {
+            document.getElementById("searchInput").value = word;
+            searchWord();
+        }
+
+        // 初期表示
         loadMoreWords();
         loadMoreWords();
         loadMoreWords();
