@@ -146,25 +146,33 @@
         <span class="no">No.${no}</span>
         <span class="word">${word}</span>
         
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; margin-bottom: 15px;">
             <a class="btn-dict" href="https://www.google.com/search?q=${encodeURIComponent(word)}+意味" target="_blank" style="margin-top:0;">🔍 Googleで意味を調べる</a>
-            
-            <!-- ボタン1：画像生成だけを行うボタン -->
-            <button onclick="generateWordImageOnly('${word}', '${no}')" style="background: #a855f7; font-size: 12px; padding: 6px 12px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold;">🎨 単語画像を生成</button>
-            
-            <!-- ボタン2：一発で画像生成してXへ遷移するボタン -->
-            <button onclick="generateAndShareX('${word}', '${no}')" style="background: #000; font-size: 12px; padding: 6px 12px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold;">𝕏 画像を生成してシェア</button>
         </div>
         
-        <!-- 画像の表示エリア（最初は隠れています） -->
-        <div id="imageResultArea" style="margin-top: 15px; display: none; text-align: center;">
+        <!-- 検索時点で自動表示される画像エリア -->
+        <div id="imageResultArea" style="text-align: center; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed #cbd5e1;">
             <canvas id="wordCanvas" width="600" height="315" style="display:none;"></canvas>
             <img id="outputImage" src="" alt="生成画像" style="max-width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-            <p id="imageHintText" style="font-size: 12px; color: #64748b; margin: 5px 0 0;"></p>
+            
+            <p style="font-size: 13px; color: #475569; font-weight: bold; margin: 10px 0 5px;">
+                👆 上の画像を長押し、または右クリックで保存してください
+            </p>
+            <p style="font-size: 12px; color: #64748b; margin: 0 0 15px; line-height: 1.4;">
+                保存ができたら、下のボタンから𝕏（Twitter）を開いて、<br>いま保存した画像を添付してポストできます！
+            </p>
+            
+            <!-- X共有ボタン（案内を読んでから自分のタイミングで押せる） -->
+            <a id="btnXPost" href="#" target="_blank" style="display: inline-block; padding: 10px 20px; font-size: 14px; background: #000; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">𝕏 画像を添付してポストする</a>
         </div>
     </div>
     <hr style="border:0; height:1px; background:#cbd5e1; margin:30px 0;">
 `;
+
+// 📄 検索完了の直後に、裏側で画像を自動生成してセットする処理を呼び出す
+setTimeout(() => {
+    setupWordImageAndLink(word, no);
+}, 50);
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -216,34 +224,58 @@
 
     return canvas.toDataURL("image/png");
 }
+        
+function drawCanvas(word, no) {
+    const canvas = document.getElementById("wordCanvas");
+    const ctx = canvas.getContext("2d");
 
-// 【ボタン1用】画像生成だけを行う機能
-function generateWordImageOnly(word, no) {
-    const imgUrl = drawCanvas(word, no);
-    const outputImg = document.getElementById("outputImage");
-    outputImg.src = imgUrl;
+    // 背景グラデーション
+    const gradient = ctx.createLinearGradient(0, 0, 600, 315);
+    gradient.addColorStop(0, '#eff6ff');
+    gradient.addColorStop(1, '#dbeafe');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 600, 315);
 
-    document.getElementById("imageHintText").innerText = "↑画像を長押し・右クリックで保存できます！";
-    document.getElementById("imageResultArea").style.display = "block";
+    // 飾り枠線
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(20, 20, 560, 275);
+
+    // タイトルとNo
+    ctx.fillStyle = '#64748b';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('📚 全言葉辞典 Archives', 40, 55);
+
+    ctx.fillStyle = '#3b82f6';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillText('No.' + no, 40, 100);
+
+    // 単語を中央に
+    ctx.fillStyle = '#1e293b';
+    ctx.font = 'bold 50px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(word, 300, 175);
+
+    return canvas.toDataURL("image/png");
 }
 
-// 【ボタン2用】一気に画像生成してXへ遷移する機能
-function generateAndShareX(word, no) {
-    // 1. まず裏側で画像を生成して画面にセットしておく（保存してもらうため）
+// 検索時に自動で画像をセットし、Xのリンクを作成しておく関数
+function setupWordImageAndLink(word, no) {
+    // 1. 画像を作成してimgタグに反映
     const imgUrl = drawCanvas(word, no);
     const outputImg = document.getElementById("outputImage");
-    outputImg.src = imgUrl;
+    if (outputImg) outputImg.src = imgUrl;
 
-    document.getElementById("imageHintText").innerText = "↑画像をコピー・保存して、開いた𝕏の画面に添付してください！";
-    document.getElementById("imageResultArea").style.display = "block";
-
-    // 2. そのままXの投稿画面へジャンプ
+    // 2. X（Twitter）用のリンクをあらかじめ作成してボタンに仕込んでおく
     const tweetText = `全言葉辞典で「No.${no} ${word}」を調べました！\n#全言葉辞典\n`;
     const siteUrl = window.location.href;
     const xUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(siteUrl)}`;
     
-    // 新しいタブでXを開く
-    window.open(xUrl, '_blank');
+    const btnXPost = document.getElementById("btnXPost");
+    if (btnXPost) btnXPost.href = xUrl;
 }
     </script>
 </body>
