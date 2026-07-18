@@ -16,8 +16,8 @@
         .word-list { margin-top: 20px; }
         .word-item { padding: 15px; background: white; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-left: 5px solid #cbd5e1; }
         .word-item.highlight { background: #eff6ff; border-left-color: #3b82f6; }
-        .no { font-weight: bold; color: #3b82f6; font-size: 14px; }
-        .word { font-size: 24px; display: block; margin: 8px 0; font-weight: bold; letter-spacing: 1px; }
+        .no { font-weight: bold; color: #3b82f6; font-size: 14px; word-break: break-all; }
+        .word { font-size: 24px; display: block; margin: 8px 0; font-weight: bold; letter-spacing: 1px; word-break: break-all; }
         .btn-dict { display: inline-block; margin-top: 8px; padding: 6px 12px; font-size: 12px; background: #10b981; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; }
         .btn-dict:hover { background: #059669; }
     </style>
@@ -189,7 +189,8 @@ setTimeout(() => {
         loadMoreWords();
         loadMoreWords();
 
-        function drawCanvas(word, no) {
+        // 🖼️ 自動改行＆サイズ調整付きの画像作成処理
+function drawCanvas(word, no) {
     const canvas = document.getElementById("wordCanvas");
     const ctx = canvas.getContext("2d");
 
@@ -205,23 +206,65 @@ setTimeout(() => {
     ctx.lineWidth = 8;
     ctx.strokeRect(20, 20, 560, 275);
 
-    // タイトルとNo
+    // タイトル
     ctx.fillStyle = '#64748b';
     ctx.font = 'bold 16px sans-serif';
     ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText('📚 全単語辞典 Archives', 40, 55);
+    ctx.fillText('📚 全言葉辞典 Archives', 40, 55);
 
+    // 【対策①】Noの長さに応じてフォントサイズを小さくし、枠内に収める
+    const noText = 'No.' + no;
+    let noFontSize = 20;
+    ctx.font = `bold ${noFontSize}px sans-serif`;
+    while (ctx.measureText(noText).width > 520 && noFontSize > 10) {
+        noFontSize--;
+        ctx.font = `bold ${noFontSize}px sans-serif`;
+    }
     ctx.fillStyle = '#3b82f6';
-    ctx.font = 'bold 20px sans-serif';
-    ctx.fillText('No.' + no, 40, 100);
+    ctx.fillText(noText, 40, 95);
 
-    // 単語を中央に
+    // 【対策②】単語（word）を文字数に応じて自動改行＆サイズダウン
+    let wordFontSize = 50;
+    if (word.length > 30) wordFontSize = 24; // 非常に長い時はベースを小さく
+    else if (word.length > 10) wordFontSize = 36;
+
+    ctx.font = `bold ${wordFontSize}px sans-serif`;
     ctx.fillStyle = '#1e293b';
-    ctx.font = 'bold 50px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(word, 300, 175);
+
+    const maxWidth = 500; // 左右の余白を引いた最大横幅
+    const lines = [];
+    let currentLine = "";
+
+    // 文字を1文字ずつ検証して自動で改行位置を決める
+    for (let i = 0; i < word.length; i++) {
+        const char = word[i];
+        const testLine = currentLine + char;
+        const testWidth = ctx.measureText(testLine).width;
+
+        if (testWidth > maxWidth && i > 0) {
+            lines.push(currentLine);
+            currentLine = char;
+        } else {
+            currentLine = testLine;
+        }
+    }
+    lines.push(currentLine);
+
+    // 行数が増えすぎた場合は、さらに文字サイズをギュッと縮小する
+    let lineHeight = wordFontSize * 1.2;
+    while (lines.length * lineHeight > 160 && wordFontSize > 12) {
+        wordFontSize--;
+        lineHeight = wordFontSize * 1.2;
+    }
+    ctx.font = `bold ${wordFontSize}px sans-serif`;
+
+    // 縦方向の中央（Y座標）を計算して、バランスよく描画する
+    const startY = 195 - ((lines.length - 1) * lineHeight) / 2;
+    lines.forEach((line, index) => {
+        ctx.fillText(line, 300, startY + (index * lineHeight));
+    });
 
     return canvas.toDataURL("image/png");
 }
