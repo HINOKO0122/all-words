@@ -25,7 +25,7 @@
 <body>
 
     <h1>📚 バベルの国語辞典(The Vocabulary Book of Babel)</h1>
-    <div class="subtitle">ひらがなの全ての組み合わせを網羅したアーカイブ</br>全ての単語がこの辞典に載っている</br></br>あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉっゃゅょゎー</div>
+    <div class="subtitle">ひらがなの全ての組み合わせを網羅したアーカイブ</br>全ての単語がこの辞典に載っている</br></br>あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんゔがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉゕゃゅょゎー</div>
 
     <div class="search-box">
         <input type="text" id="searchInput" placeholder="単語（例: ばななす）または 番号（例: 34327755）を入力" onkeydown="if(event.key === 'Enter') searchWord()">
@@ -37,7 +37,7 @@
     <div class="word-list" id="wordList"></div>
 
     <script>
-        const CHARS = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉっゃゅょゎー";
+        const CHARS = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんゔがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉゕゃゅょゎー";
         const BASE = BigInt(CHARS.length);
 
         let currentLoadedCount = 0;
