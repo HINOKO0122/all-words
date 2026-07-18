@@ -239,12 +239,72 @@ function drawCanvas(word, no) {
     }
     noLines.push(currentNoLine);
 
-    // 数字を上部から順番に描画（複数行になっても下に伸びる）
-    const noLineHeight = 22;
+    // ---------------------------------------------
+    // 【修正】数字の行数と単語の長さに合わせてサイズを大縮小する
+    // ---------------------------------------------
+    // 文字数が異常に多い場合は、最初からフォントを限界まで小さくする
+    let wordFontSize = 50;
+    if (word.length > 200) wordFontSize = 12; // 消失レベル
+    else if (word.length > 50) wordFontSize = 18;
+    else if (word.length > 10) wordFontSize = 32;
+
+    ctx.font = `bold ${wordFontSize}px sans-serif`;
+    ctx.fillStyle = '#1e293b';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top'; // 基準を「上端」に変えて重なりを防ぐ
+
+    // 単語の改行ラインを計算
+    let lines = [];
+    let currentLine = "";
+
+    for (let i = 0; i < word.length; i++) {
+        const char = word[i];
+        const testLine = currentLine + char;
+        const testWidth = ctx.measureText(testLine).width;
+
+        if (testWidth > maxWidth && i > 0) {
+            lines.push(currentLine);
+            currentLine = char;
+        } else {
+            currentLine = testLine;
+        }
+    }
+    lines.push(currentLine);
+
+    // 数字の行数が多い場合は、数字の文字サイズも少し小さくして行間を詰める
+    let noFontSize = 18;
+    let noLineHeight = 22;
+    if (noLines.length > 4) {
+        noFontSize = 13;
+        noLineHeight = 16;
+    }
+
+    // --- ここから実際の描画処理 ---
+    
+    // 1. 数字を上から描画
+    ctx.font = `bold ${noFontSize}px sans-serif`;
+    ctx.fillStyle = '#3b82f6';
     noLines.forEach((line, index) => {
-        ctx.fillText(line, 40, 85 + (index * noLineHeight));
+        ctx.fillText(line, 40, 80 + (index * noLineHeight));
     });
 
+    // 2. 数字が「描き終わった位置（Y座標）」を正確に計算する
+    const noBottomY = 80 + (noLines.length * noLineHeight) + 10;
+
+    // 3. 残りの全スペース（枠の下端275pxまで）に単語が収まるよう、さらにフォントサイズを自動調整
+    let lineHeight = wordFontSize * 1.3;
+    while (noBottomY + (lines.length * lineHeight) > 280 && wordFontSize > 10) {
+        wordFontSize--;
+        lineHeight = wordFontSize * 1.3;
+    }
+
+    // 4. 単語を、数字のすぐ下から順番に描画する（絶対にぶつからない）
+    ctx.font = `bold ${wordFontSize}px sans-serif`;
+    ctx.fillStyle = '#1e293b';
+    
+    lines.forEach((line, index) => {
+        ctx.fillText(line, 300, noBottomY + (index * lineHeight));
+    });
     // ---------------------------------------------
     // 単語（word）を自動改行＆サイズダウンして中央描画
     // ---------------------------------------------
