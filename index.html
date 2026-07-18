@@ -284,6 +284,7 @@ function drawCanvas(word, no) {
     // 1. 数字を上から描画
     ctx.font = `bold ${noFontSize}px sans-serif`;
     ctx.fillStyle = '#3b82f6';
+    ctx.textAlign = 'left';
     noLines.forEach((line, index) => {
         ctx.fillText(line, 40, 80 + (index * noLineHeight));
     });
