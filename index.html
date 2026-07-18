@@ -211,7 +211,7 @@ function drawCanvas(word, no) {
     ctx.font = 'bold 16px sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText('📚 全言葉辞典 Archives', 40, 55);
+    ctx.fillText('📚 全単語辞典 Archives', 40, 55);
 
     const maxWidth = 520; // 左右の枠線を避けた最大横幅
 
@@ -335,7 +335,7 @@ function setupWordImageAndLink(word, no) {
     }
 
     // 3. X（Twitter）用のリンクを作成してボタンに仕込んでおく
-    const tweetText = `全言葉辞典で「No.${no} ${word}」を調べました！\n#全言葉辞典\n`;
+    const tweetText = `全単語辞典で「No.${no} ${word}」を調べました！\n#全単語辞典\n`;
     const siteUrl = window.location.href;
     const xUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(siteUrl)}`;
     
