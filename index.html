@@ -302,6 +302,7 @@ function drawCanvas(word, no) {
     // 4. 単語を、数字のすぐ下から順番に描画する（絶対にぶつからない）
     ctx.font = `bold ${wordFontSize}px sans-serif`;
     ctx.fillStyle = '#1e293b';
+    ctx.textAlign = 'center';
     
     lines.forEach((line, index) => {
         ctx.fillText(line, 300, noBottomY + (index * lineHeight));
