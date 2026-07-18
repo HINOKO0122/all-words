@@ -271,13 +271,37 @@ function drawCanvas(word, no) {
     }
     lines.push(currentLine);
 
-    // 数字の行数が多い場合は、数字の文字サイズも少し小さくして行間を詰める
+    // 💡【修正】数字が多すぎる場合に限界まで小さくし、文字の折り返しを再計算する
     let noFontSize = 18;
     let noLineHeight = 22;
-    if (noLines.length > 4) {
+
+    // 数字の元の行数が長い場合、フォントサイズを限界まで小さくする
+    if (noLines.length > 8) {
+        noFontSize = 9;
+        noLineHeight = 11;
+    } else if (noLines.length > 3) {
         noFontSize = 13;
         noLineHeight = 16;
     }
+
+    // 小さくなったフォントサイズに合わせて、数字の改行位置（noLines）を綺麗に再計算
+    ctx.font = `bold ${noFontSize}px sans-serif`;
+    const finalNoLines = [];
+    let currentNoLineFinal = "";
+
+    for (let i = 0; i < noText.length; i++) {
+        const char = noText[i];
+        const testLine = currentNoLineFinal + char;
+        const testWidth = ctx.measureText(testLine).width;
+
+        if (testWidth > maxWidth && i > 0) {
+            finalNoLines.push(currentNoLineFinal);
+            currentNoLineFinal = char;
+        } else {
+            currentNoLineFinal = testLine;
+        }
+    }
+    finalNoLines.push(currentNoLineFinal);
 
     // --- ここから実際の描画処理 ---
     
