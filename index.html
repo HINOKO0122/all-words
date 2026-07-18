@@ -141,23 +141,30 @@
 
             const targetArea = document.getElementById("targetWordArea");
             targetArea.innerHTML = `
-                <h2 style="font-size: 18px; color: #3b82f6; margin-top: 20px;">🔍 検索結果へワープしました</h2>
-                <div class="word-item highlight">
-                    <span class="no">No.${no}</span>
-                    <span class="word">${word}</span>
-                    <a class="btn-dict" href="https://www.google.com/search?q=${encodeURIComponent(word)}+意味" target="_blank">🔍 Googleで意味を調べる</a>
-
-                    <button onclick="generateWordImage('${word}', '${no}')" style="background: #a855f7; margin-top: 8px; font-size: 12px; padding: 6px 12px;">🎨 単語画像を生成</button>
+    <h2 style="font-size: 18px; color: #3b82f6; margin-top: 20px;">🔍 検索結果へワープしました</h2>
+    <div class="word-item highlight">
+        <span class="no">No.${no}</span>
+        <span class="word">${word}</span>
         
-                    <div id="imageResultArea" style="margin-top: 15px; display: none; text-align: center;">
-                        <canvas id="wordCanvas" width="600" height="315" style="display:none;"></canvas>
-                        <img id="outputImage" src="" alt="生成画像" style="max-width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                        <p style="font-size: 12px; color: #64748b; margin: 5px 0 10px;">↑画像を長押し・右クリックで保存して、下のボタンからポストに添付できます！</p>
-                        <a id="btnXPost" href="#" target="_blank" style="display: inline-block; padding: 10px 20px; font-size: 14px; background: #000; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">𝕏 画像を添付してポストする</a>
-                    </div>
-                </div>
-                <hr style="border:0; height:1px; background:#cbd5e1; margin:30px 0;">
-            `;
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+            <a class="btn-dict" href="https://www.google.com/search?q=${encodeURIComponent(word)}+意味" target="_blank" style="margin-top:0;">🔍 Googleで意味を調べる</a>
+            
+            <!-- ボタン1：画像生成だけを行うボタン -->
+            <button onclick="generateWordImageOnly('${word}', '${no}')" style="background: #a855f7; font-size: 12px; padding: 6px 12px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold;">🎨 単語画像を生成</button>
+            
+            <!-- ボタン2：一発で画像生成してXへ遷移するボタン -->
+            <button onclick="generateAndShareX('${word}', '${no}')" style="background: #000; font-size: 12px; padding: 6px 12px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold;">𝕏 画像を生成してシェア</button>
+        </div>
+        
+        <!-- 画像の表示エリア（最初は隠れています） -->
+        <div id="imageResultArea" style="margin-top: 15px; display: none; text-align: center;">
+            <canvas id="wordCanvas" width="600" height="315" style="display:none;"></canvas>
+            <img id="outputImage" src="" alt="生成画像" style="max-width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <p id="imageHintText" style="font-size: 12px; color: #64748b; margin: 5px 0 0;"></p>
+        </div>
+    </div>
+    <hr style="border:0; height:1px; background:#cbd5e1; margin:30px 0;">
+`;
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -173,55 +180,71 @@
         loadMoreWords();
         loadMoreWords();
 
-        function generateWordImage(word, no) {
-            const canvas = document.getElementById("wordCanvas");
-            const ctx = canvas.getContext("2d");
+        function drawCanvas(word, no) {
+    const canvas = document.getElementById("wordCanvas");
+    const ctx = canvas.getContext("2d");
 
-            // 1. 背景をグラデーションで綺麗に塗る
-            const gradient = ctx.createLinearGradient(0, 0, 600, 315);
-            gradient.addColorStop(0, '#eff6ff'); // 薄い青
-            gradient.addColorStop(1, '#dbeafe');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 600, 315);
+    // 背景グラデーション
+    const gradient = ctx.createLinearGradient(0, 0, 600, 315);
+    gradient.addColorStop(0, '#eff6ff');
+    gradient.addColorStop(1, '#dbeafe');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 600, 315);
 
-            // 2. 飾り枠線を描く
-            ctx.strokeStyle = '#3b82f6';
-            ctx.lineWidth = 8;
-            ctx.strokeRect(20, 20, 560, 275);
+    // 飾り枠線
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(20, 20, 560, 275);
 
-            // 3. 辞典のタイトルを描く
-            ctx.fillStyle = '#64748b';
-            ctx.font = 'bold 16px sans-serif';
-            ctx.fillText('📚 全言葉辞典 Archives', 40, 55);
+    // タイトルとNo
+    ctx.fillStyle = '#64748b';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('📚 全言葉辞典 Archives', 40, 55);
 
-            // 4. ナンバー（No.）を描く
-            ctx.fillStyle = '#3b82f6';
-            ctx.font = 'bold 20px sans-serif';
-            ctx.fillText('No.' + no, 40, 100);
+    ctx.fillStyle = '#3b82f6';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillText('No.' + no, 40, 100);
 
-            // 5. 単語（言葉）を大きく中央に描く
-            ctx.fillStyle = '#1e293b';
-            ctx.font = 'bold 50px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(word, 300, 175);
+    // 単語を中央に
+    ctx.fillStyle = '#1e293b';
+    ctx.font = 'bold 50px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(word, 300, 175);
 
-            // 6. Canvasを画像（データ）に変換して画面に表示
-            const imgUrl = canvas.toDataURL("image/png");
-            const outputImg = document.getElementById("outputImage");
-            outputImg.src = imgUrl;
+    return canvas.toDataURL("image/png");
+}
 
-            // 7. X（旧Twitter）ポスト用のURLを設定
-            // ※仕様上、画像ファイルを自動添付することはできないため、ユーザーがクリップボードや端末から添付できるようにテキストをセットします。
-            const tweetText = `全言葉辞典で「No.${no} ${word}」を調べました！\n#全言葉辞典 \n`;
-            const siteUrl = window.location.href; // 自分のサイトのURL
-            const xUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(siteUrl)}`;
-            
-            document.getElementById("btnXPost").href = xUrl;
-        
-            // 表示エリアを出現させる
-            document.getElementById("imageResultArea").style.display = "block";
-        }
+// 【ボタン1用】画像生成だけを行う機能
+function generateWordImageOnly(word, no) {
+    const imgUrl = drawCanvas(word, no);
+    const outputImg = document.getElementById("outputImage");
+    outputImg.src = imgUrl;
+
+    document.getElementById("imageHintText").innerText = "↑画像を長押し・右クリックで保存できます！";
+    document.getElementById("imageResultArea").style.display = "block";
+}
+
+// 【ボタン2用】一気に画像生成してXへ遷移する機能
+function generateAndShareX(word, no) {
+    // 1. まず裏側で画像を生成して画面にセットしておく（保存してもらうため）
+    const imgUrl = drawCanvas(word, no);
+    const outputImg = document.getElementById("outputImage");
+    outputImg.src = imgUrl;
+
+    document.getElementById("imageHintText").innerText = "↑画像をコピー・保存して、開いた𝕏の画面に添付してください！";
+    document.getElementById("imageResultArea").style.display = "block";
+
+    // 2. そのままXの投稿画面へジャンプ
+    const tweetText = `全言葉辞典で「No.${no} ${word}」を調べました！\n#全言葉辞典\n`;
+    const siteUrl = window.location.href;
+    const xUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(siteUrl)}`;
+    
+    // 新しいタブでXを開く
+    window.open(xUrl, '_blank');
+}
     </script>
 </body>
 </html>
