@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>すべての単語が集まるサイト</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9; }
+        .search-box { position: sticky; top: 0; background: #f9f9f9; padding: 10px 0; border-bottom: 20px solid #f9f9f9; z-index: 100; }
+        input { width: 70%; padding: 10px; font-size: 16px; }
+        button { padding: 10px; font-size: 16px; cursor: pointer; }
+        .word-list { margin-top: 20px; }
+        .word-item { padding: 10px; background: white; margin-bottom: 8px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .word-item.highlight { background: #fff9c4; border: 2px solid #fbc02d; }
+        .no { font-weight: bold; color: #007bff; }
+        .date { font-size: 12px; color: #888; margin-left: 10px; }
+        .word { font-size: 20px; display: block; margin-top: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="調べたい単語を入力（例：あい）">
+        <button onclick="searchWord()">検索してワープ</button>
+    </div>
+
+    <div id="targetWordArea"></div>
+    <h2>今日までに追加された単語一覧</h2>
+    <div class="word-list" id="wordList"></div>
+
+    <script>
+        // 1. 使用する全文字（86文字）
+        const CHARS = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉっゃゅょゎー";
+        const BASE = BigInt(CHARS.length);
+
+        // 2. サイトの開始日を設定（例: 2026年7月1日）
+        const START_DATE = new Date("2026-07-01T00:00:00"); 
+        const WORDS_PER_DAY = 10000;
+
+        // 無限スクロール用の管理変数
+        let currentLoadedCount = 0;
+        const LOAD_CHUNK = 200; // 1回に読み込む件数
+        let maxDisplayCount = 7482; // 最低でもNo.7482までは表示する
+
+        // 数値(No)から単語を逆算する関数
+        function getWordFromNo(no) {
+            let n = BigInt(no) - 1n;
+            let word = "";
+            let len = 1n;
+            let range = BASE;
+
+            while (n >= range) {
+                n -= range;
+                len++;
+                range *= BASE;
+            }
+
+            for (let i = 0; i < len; i++) {
+                word = CHARS[Number(n % BASE)] + word;
+                n /= BASE;
+            }
+            return word;
+        }
+
+        // 単語から数値(No)を逆算する関数
+        function getNoFromWord(word) {
+            let no = 0n;
+            let len = BigInt(word.length);
+            let range = 1n;
+
+            for (let i = 1n; i < len; i++) {
+                range *= BASE;
+                no += range;
+            }
+
+            let current = 0n;
+            for (let i = 0; i < word.length; i++) {
+                const char = word[i];
+                const index = CHARS.indexOf(char);
+                if (index === -1) return -1n;
+                current = current * BASE + BigInt(index);
+            }
+            return no + current + 1n;
+        }
+
+        // 日付計算
+        function getDateFromNo(no) {
+            const daysSinceStart = Math.floor(Number((BigInt(no) - 1n) / BigInt(WORDS_PER_DAY)));
+            const targetDate = new Date(START_DATE);
+            targetDate.setDate(START_DATE.getDate() + daysSinceStart);
+            return targetDate.toLocaleDateString("ja-JP");
+        }
+
+        // 現在の「日付上の最大公開数」と「リクエストの7482」の大きい方を基準にする
+        function追加された総数を計算() {
+            const now = new Date();
+            const diffTime = Math.max(0, now - START_DATE);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const dateTotal = (diffDays + 1) * WORDS_PER_DAY;
+            
+            // 日付の計算結果が7482より小さくても、強制的に7482までは表示対象にする
+            return Math.max(maxDisplayCount, dateTotal);
+        }
+
+        // 単語を少しずつ追加して表示する（軽さキープのため）
+        function loadMoreWords() {
+            const totalWords = 追加された総数を計算();
+            if (currentLoadedCount >= totalWords) return;
+
+            const listContainer = document.getElementById("wordList");
+            let html = "";
+            
+            // 今回読み込む範囲を決定（1から順に上から並べます）
+            const start = currentLoadedCount + 1;
+            const end = Math.min(totalWords, currentLoadedCount + LOAD_CHUNK);
+
+            for (let i = start; i <= end; i++) {
+                const word = getWordFromNo(i);
+                const dateStr = getDateFromNo(i);
+                html += `
+                    <div class="word-item" id="word-${word}">
+                        <span class="no">No.${i}</span>
+                        <span class="date">追加日: ${dateStr}</span>
+                        <span class="word">${word}</span>
+                    </div>
+                `;
+            }
+            
+            // 既存のリストの後ろに付け足す
+            listContainer.insertAdjacentHTML('beforeend', html);
+            currentLoadedCount = end;
+        }
+
+        // スクリュー監視（一番下まで来たら追加読み込み）
+        window.addEventListener('scroll', () => {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+                loadMoreWords();
+            }
+        });
+
+        // 検索＆ワープ機能
+        function searchWord() {
+            const input = document.getElementById("searchInput").value.trim();
+            if (!input) return;
+
+            const no = getNoFromWord(input);
+            if (no === -1n) {
+                alert("使用できない文字が含まれています。");
+                return;
+            }
+
+            const dateStr = getDateFromNo(no);
+            const totalWords = BigInt(追加された総数を計算());
+
+            const targetArea = document.getElementById("targetWordArea");
+            
+            let statusText = "";
+            if (no > totalWords) {
+                statusText = `<span style="color:orange;">⚠️ 未来に追加される予定の単語です</span>`;
+            } else {
+                statusText = `<span style="color:green;">✓ リスト内に存在する単語です</span>`;
+            }
+
+            targetArea.innerHTML = `
+                <h2>検索結果 (ここにワープしました)</h2>
+                <div class="word-item highlight">
+                    <span class="no">No.${no}</span>
+                    <span class="date">追加（予定）日: ${dateStr}</span>
+                    <span class="word">${input}</span>
+                    <div style="margin-top:5px; font-size:14px;">${statusText}</div>
+                </div>
+                <hr style="border:1px solid #ccc; margin:20px 0;">
+            `;
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 初期表示（最初の数回分をロードしてスクロールバーを出す）
+        loadMoreWords();
+        loadMoreWords();
+        loadMoreWords();
+    </script>
+</body>
+</html>
