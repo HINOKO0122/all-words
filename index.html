@@ -305,50 +305,6 @@ function drawCanvas(word, no) {
     lines.forEach((line, index) => {
         ctx.fillText(line, 300, noBottomY + (index * lineHeight));
     });
-    // ---------------------------------------------
-    // 単語（word）を自動改行＆サイズダウンして中央描画
-    // ---------------------------------------------
-    let wordFontSize = 50;
-    if (word.length > 30) wordFontSize = 24; 
-    else if (word.length > 10) wordFontSize = 36;
-
-    ctx.font = `bold ${wordFontSize}px sans-serif`;
-    ctx.fillStyle = '#1e293b';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    const lines = [];
-    let currentLine = "";
-
-    for (let i = 0; i < word.length; i++) {
-        const char = word[i];
-        const testLine = currentLine + char;
-        const testWidth = ctx.measureText(testLine).width;
-
-        if (testWidth > maxWidth && i > 0) {
-            lines.push(currentLine);
-            currentLine = char;
-        } else {
-            currentLine = testLine;
-        }
-    }
-    lines.push(currentLine);
-
-    // 行数が増えすぎた場合は縮小
-    let lineHeight = wordFontSize * 1.2;
-    while (lines.length * lineHeight > 140 && wordFontSize > 12) {
-        wordFontSize--;
-        lineHeight = wordFontSize * 1.2;
-    }
-    ctx.font = `bold ${wordFontSize}px sans-serif`;
-
-    // 数字の行数に応じて、中央の単語の開始位置を少し下にズラして被りを防ぐ
-    const wordAreaCenterY = 195 + ((noLines.length - 1) * 10);
-    const startY = wordAreaCenterY - ((lines.length - 1) * lineHeight) / 2;
-
-    lines.forEach((line, index) => {
-        ctx.fillText(line, 300, startY + (index * lineHeight));
-    });
 
     return canvas.toDataURL("image/png");
 }
