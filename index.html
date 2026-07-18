@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全単語辞典</title>
+    <title>バベルの国語辞典</title>
     <style>
         body { font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f4f6f9; color: #333; }
         h1 { text-align: center; color: #2c3e50; font-size: 28px; margin-bottom: 5px; }
@@ -24,7 +24,7 @@
 </head>
 <body>
 
-    <h1>📚 全単語辞典</h1>
+    <h1>📚 バベルの国語辞典</h1>
     <div class="subtitle">ひらがなの全ての組み合わせを網羅したアーカイブ</br>全ての単語がこの辞典に載っている</br></br>あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉっゃゅょゎー</div>
 
     <div class="search-box">
@@ -211,7 +211,7 @@ function drawCanvas(word, no) {
     ctx.font = 'bold 16px sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText('📚 全単語辞典 Archives', 40, 55);
+    ctx.fillText('📚 バベルの国語辞典 Archives', 40, 55);
 
     const maxWidth = 520; // 左右の枠線を避けた最大横幅
 
@@ -359,7 +359,7 @@ function setupWordImageAndLink(word, no) {
     }
 
     // 3. X（Twitter）用のリンクを作成してボタンに仕込んでおく
-    const tweetText = `全単語辞典で「No.${no} ${word}」を調べました！\n#全単語辞典\n`;
+    const tweetText = `バベルの国語辞典で「No.${no} ${word}」を調べました！\n#バベルの国語辞典\n`;
     const siteUrl = window.location.href;
     const xUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(siteUrl)}`;
     
