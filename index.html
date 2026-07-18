@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全言葉辞典</title>
+    <title>全単語辞典</title>
     <style>
         body { font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f4f6f9; color: #333; }
         h1 { text-align: center; color: #2c3e50; font-size: 28px; margin-bottom: 5px; }
@@ -24,7 +24,7 @@
 </head>
 <body>
 
-    <h1>📚 全言葉辞典</h1>
+    <h1>📚 全単語辞典</h1>
     <div class="subtitle">すべてのひらがなの組み合わせを網羅したアーカイブ</br></br>あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉっゃゅょゎー</div>
 
     <div class="search-box">
@@ -44,7 +44,7 @@
         const LOAD_CHUNK = 50; 
         const maxDisplayCount = 6806; // 「ーー」までの語数
 
-        // ナンバーから言葉を作る
+        // ナンバーから単語を作る
         function getWordFromNo(no) {
             let n = BigInt(no) - 1n;
             let word = "";
@@ -64,7 +64,7 @@
             return word;
         }
 
-        // 言葉からナンバーを作る
+        // 単語からナンバーを作る
         function getNoFromWord(word) {
             let no = 0n;
             let len = BigInt(word.length);
@@ -208,7 +208,7 @@ setTimeout(() => {
     ctx.font = 'bold 16px sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText('📚 全言葉辞典 Archives', 40, 55);
+    ctx.fillText('📚 全単語辞典 Archives', 40, 55);
 
     ctx.fillStyle = '#3b82f6';
     ctx.font = 'bold 20px sans-serif';
@@ -245,7 +245,7 @@ function drawCanvas(word, no) {
     ctx.font = 'bold 16px sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText('📚 全言葉辞典 Archives', 40, 55);
+    ctx.fillText('📚 全単語辞典 Archives', 40, 55);
 
     ctx.fillStyle = '#3b82f6';
     ctx.font = 'bold 20px sans-serif';
@@ -269,7 +269,7 @@ function setupWordImageAndLink(word, no) {
     if (outputImg) outputImg.src = imgUrl;
 
     // 2. X（Twitter）用のリンクをあらかじめ作成してボタンに仕込んでおく
-    const tweetText = `全言葉辞典で「No.${no} ${word}」を調べました！\n#全言葉辞典\n`;
+    const tweetText = `全単語辞典で「No.${no} ${word}」を調べました！\n#全単語辞典\n`;
     const siteUrl = window.location.href;
     const xUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(siteUrl)}`;
     
