@@ -28,7 +28,7 @@
     <div class="subtitle">ひらがなの全ての組み合わせを網羅したアーカイブ</br>全ての単語がこの辞典に載っている</br></br>あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉっゃゅょゎー</div>
 
     <div class="search-box">
-        <input type="text" id="searchInput" placeholder="単語（例: あい）または 番号（例: 500）を入力" onkeydown="if(event.key === 'Enter') searchWord()">
+        <input type="text" id="searchInput" placeholder="単語（例: ばななす）または 番号（例: 34327755）を入力" onkeydown="if(event.key === 'Enter') searchWord()">
     <button onclick="searchWord()">検索</button>
     </div>
 
@@ -140,7 +140,7 @@
 
             const targetArea = document.getElementById("targetWordArea");
             targetArea.innerHTML = `
-    <h2 style="font-size: 18px; color: #3b82f6; margin-top: 20px;">🔍 検索結果へワープしました</h2>
+    <h2 style="font-size: 18px; color: #3b82f6; margin-top: 20px;">🔍 検索結果</h2>
     <div class="word-item highlight">
         <span class="no">No.${no}</span>
         <span class="word">${word}</span>
