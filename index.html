@@ -290,7 +290,7 @@ function drawCanvas(word, no) {
     });
 
     // 2. 数字が「描き終わった位置（Y座標）」を正確に計算する
-    const noBottomY = 80 + (noLines.length * noLineHeight) + 10;
+    let noBottomY = 80 + (noLines.length * noLineHeight) + 15;
 
     // 3. 残りの全スペース（枠の下端275pxまで）に単語が収まるよう、さらにフォントサイズを自動調整
     let lineHeight = wordFontSize * 1.3;
@@ -299,13 +299,22 @@ function drawCanvas(word, no) {
         lineHeight = wordFontSize * 1.3;
     }
 
-    // 4. 単語を、数字のすぐ下から順番に描画する（絶対にぶつからない）
+    // 💡【修正】通常時は中央配置、数字が長くてぶつかる時だけ下にズラす計算
+    const totalWordHeight = lines.length * lineHeight; // 単語全体の縦幅
+    let wordStartY = 165 - (totalWordHeight / 2);      // 画像の縦中心（165px）を基準にする
+
+    // もし中央に置くと数字と被る（または近すぎる）場合は、数字のすぐ下に押し下げる
+    if (wordStartY < noBottomY) {
+        wordStartY = noBottomY;
+    }
+
+    // 4. 単語を計算した位置から順番に描画する
     ctx.font = `bold ${wordFontSize}px sans-serif`;
     ctx.fillStyle = '#1e293b';
     ctx.textAlign = 'center';
     
     lines.forEach((line, index) => {
-        ctx.fillText(line, 300, noBottomY + (index * lineHeight));
+        ctx.fillText(line, 300, wordStartY + (index * lineHeight));
     });
 
     return canvas.toDataURL("image/png");
