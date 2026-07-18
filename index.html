@@ -189,7 +189,7 @@ setTimeout(() => {
         loadMoreWords();
         loadMoreWords();
 
-        // 🖼️ 自動改行＆サイズ調整付きの画像作成処理
+// 🖼️ 数字も単語も両方自動改行する画像作成処理
 function drawCanvas(word, no) {
     const canvas = document.getElementById("wordCanvas");
     const ctx = canvas.getContext("2d");
@@ -210,22 +210,47 @@ function drawCanvas(word, no) {
     ctx.fillStyle = '#64748b';
     ctx.font = 'bold 16px sans-serif';
     ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
     ctx.fillText('📚 全言葉辞典 Archives', 40, 55);
 
-    // 【対策①】Noの長さに応じてフォントサイズを小さくし、枠内に収める
-    const noText = 'No.' + no;
-    let noFontSize = 20;
-    ctx.font = `bold ${noFontSize}px sans-serif`;
-    while (ctx.measureText(noText).width > 520 && noFontSize > 10) {
-        noFontSize--;
-        ctx.font = `bold ${noFontSize}px sans-serif`;
-    }
-    ctx.fillStyle = '#3b82f6';
-    ctx.fillText(noText, 40, 95);
+    const maxWidth = 520; // 左右の枠線を避けた最大横幅
 
-    // 【対策②】単語（word）を文字数に応じて自動改行＆サイズダウン
+    // ---------------------------------------------
+    // 【対策】No.の数字部分を自動で改行して描画する
+    // ---------------------------------------------
+    const noText = 'No.' + no;
+    ctx.font = 'bold 18px sans-serif';
+    ctx.fillStyle = '#3b82f6';
+
+    const noLines = [];
+    let currentNoLine = "";
+
+    for (let i = 0; i < noText.length; i++) {
+        const char = noText[i];
+        const testLine = currentNoLine + char;
+        const testWidth = ctx.measureText(testLine).width;
+
+        if (testWidth > maxWidth && i > 0) {
+            noLines.push(currentNoLine);
+            currentNoLine = char;
+        } else {
+            currentLine = testLine; // ※スコープエラー防止のため修正
+            currentNoLine = testLine;
+        }
+    }
+    noLines.push(currentNoLine);
+
+    // 数字を上部から順番に描画（複数行になっても下に伸びる）
+    const noLineHeight = 22;
+    noLines.forEach((line, index) => {
+        ctx.fillText(line, 40, 85 + (index * noLineHeight));
+    });
+
+    // ---------------------------------------------
+    // 単語（word）を自動改行＆サイズダウンして中央描画
+    // ---------------------------------------------
     let wordFontSize = 50;
-    if (word.length > 30) wordFontSize = 24; // 非常に長い時はベースを小さく
+    if (word.length > 30) wordFontSize = 24; 
     else if (word.length > 10) wordFontSize = 36;
 
     ctx.font = `bold ${wordFontSize}px sans-serif`;
@@ -233,11 +258,9 @@ function drawCanvas(word, no) {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    const maxWidth = 500; // 左右の余白を引いた最大横幅
     const lines = [];
     let currentLine = "";
 
-    // 文字を1文字ずつ検証して自動で改行位置を決める
     for (let i = 0; i < word.length; i++) {
         const char = word[i];
         const testLine = currentLine + char;
@@ -252,16 +275,18 @@ function drawCanvas(word, no) {
     }
     lines.push(currentLine);
 
-    // 行数が増えすぎた場合は、さらに文字サイズをギュッと縮小する
+    // 行数が増えすぎた場合は縮小
     let lineHeight = wordFontSize * 1.2;
-    while (lines.length * lineHeight > 160 && wordFontSize > 12) {
+    while (lines.length * lineHeight > 140 && wordFontSize > 12) {
         wordFontSize--;
         lineHeight = wordFontSize * 1.2;
     }
     ctx.font = `bold ${wordFontSize}px sans-serif`;
 
-    // 縦方向の中央（Y座標）を計算して、バランスよく描画する
-    const startY = 195 - ((lines.length - 1) * lineHeight) / 2;
+    // 数字の行数に応じて、中央の単語の開始位置を少し下にズラして被りを防ぐ
+    const wordAreaCenterY = 195 + ((noLines.length - 1) * 10);
+    const startY = wordAreaCenterY - ((lines.length - 1) * lineHeight) / 2;
+
     lines.forEach((line, index) => {
         ctx.fillText(line, 300, startY + (index * lineHeight));
     });
