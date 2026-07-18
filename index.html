@@ -87,28 +87,27 @@
 
         // 一覧表示（無限スクロール）
         function loadMoreWords() {
-            if (currentLoadedCount >= maxDisplayCount) return;
+    if (currentLoadedCount >= maxDisplayCount) return;
 
-            const listContainer = document.getElementById("wordList");
-            let html = "";
-            
-            const start = currentLoadedCount + 1;
-            const end = Math.min(maxDisplayCount, currentLoadedCount + LOAD_CHUNK);
+    const listContainer = document.getElementById("wordList");
+    let html = "";
+    
+    const start = currentLoadedCount + 1;
+    const end = Math.min(maxDisplayCount, currentLoadedCount + LOAD_CHUNK);
 
-            for (let i = start; i <= end; i++) {
-                const word = getWordFromNo(i);
-                html += `
-                    <div class="word-item" id="word-${word}">
-                        <span class="no">No.${i}</span>
-                        <span class="word">${word}</span>
-                        <a class="btn-dict" href="https://www.google.com/search?q=${encodeURIComponent(word)}+意味" target="_blank">🔍 この言葉の意味を検索</a>
-                    </div>
-                `;
-            }
-            
-            listContainer.insertAdjacentHTML('beforeend', html);
-            currentLoadedCount = end;
-        }
+    for (let i = start; i <= end; i++) {
+        const word = getWordFromNo(i);
+        html += `
+            <div class="word-item" id="word-${word}">
+                <span class="no">No.${i}</span>
+                <span class="word">${word}</span>
+            </div>
+        `;
+    }
+    
+    listContainer.insertAdjacentHTML('beforeend', html);
+    currentLoadedCount = end;
+}
 
         window.addEventListener('scroll', () => {
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
