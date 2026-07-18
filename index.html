@@ -139,20 +139,6 @@
                 }
             }
 
-            // 「その言葉が含まれていて、意味のある言葉」のリストを生成
-            const meaningfulList = getMeaningfulWords(word);
-            let relatedHtml = "";
-            
-            meaningfulList.forEach(w => {
-                const wNo = getNoFromWord(w);
-                if (wNo !== -1n) {
-                    relatedHtml += `<a href="#" class="related-tag" onclick="injectAndSearch('${w}'); return false;">${w} (No.${wNo})</a>`;
-                } else {
-                    // 漢字などが混ざったリアルな言葉はGoogleへの直接リンクにする
-                    relatedHtml += `<a href="https://www.google.com/search?q=${encodeURIComponent(w)}+意味" target="_blank" class="related-tag" style="background:#e0f2fe;">${w} ↗</a>`;
-                }
-            });
-
             const targetArea = document.getElementById("targetWordArea");
             targetArea.innerHTML = `
                 <h2 style="font-size: 18px; color: #3b82f6; margin-top: 20px;">🔍 検索結果へワープしました</h2>
