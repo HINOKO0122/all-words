@@ -309,12 +309,12 @@ function drawCanvas(word, no) {
     ctx.font = `bold ${noFontSize}px sans-serif`;
     ctx.fillStyle = '#3b82f6';
     ctx.textAlign = 'left';
-    noLines.forEach((line, index) => {
+    FinalNoLines.forEach((line, index) => {
         ctx.fillText(line, 40, 80 + (index * noLineHeight));
     });
 
     // 2. 数字が「描き終わった位置（Y座標）」を正確に計算する
-    let noBottomY = 80 + (noLines.length * noLineHeight) + 15;
+    let noBottomY = 80 + (FinalNoLines.length * noLineHeight) + 15;
 
     // 3. 残りの全スペース（枠の下端275pxまで）に単語が収まるよう、さらにフォントサイズを自動調整
     let lineHeight = wordFontSize * 1.3;
