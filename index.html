@@ -172,6 +172,56 @@
         loadMoreWords();
         loadMoreWords();
         loadMoreWords();
+
+        function generateWordImage(word, no) {
+            const canvas = document.getElementById("wordCanvas");
+            const ctx = canvas.getContext("2d");
+
+            // 1. 背景をグラデーションで綺麗に塗る
+            const gradient = ctx.createLinearGradient(0, 0, 600, 315);
+            gradient.addColorStop(0, '#eff6ff'); // 薄い青
+            gradient.addColorStop(1, '#dbeafe');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 600, 315);
+
+            // 2. 飾り枠線を描く
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 8;
+            ctx.strokeRect(20, 20, 560, 275);
+
+            // 3. 辞典のタイトルを描く
+            ctx.fillStyle = '#64748b';
+            ctx.font = 'bold 16px sans-serif';
+            ctx.fillText('📚 全言葉辞典 Archives', 40, 55);
+
+            // 4. ナンバー（No.）を描く
+            ctx.fillStyle = '#3b82f6';
+            ctx.font = 'bold 20px sans-serif';
+            ctx.fillText('No.' + no, 40, 100);
+
+            // 5. 単語（言葉）を大きく中央に描く
+            ctx.fillStyle = '#1e293b';
+            ctx.font = 'bold 50px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(word, 300, 175);
+
+            // 6. Canvasを画像（データ）に変換して画面に表示
+            const imgUrl = canvas.toDataURL("image/png");
+            const outputImg = document.getElementById("outputImage");
+            outputImg.src = imgUrl;
+
+            // 7. X（旧Twitter）ポスト用のURLを設定
+            // ※仕様上、画像ファイルを自動添付することはできないため、ユーザーがクリップボードや端末から添付できるようにテキストをセットします。
+            const tweetText = `全言葉辞典で「No.${no} ${word}」を調べました！\n#全言葉辞典 \n`;
+            const siteUrl = window.location.href; // 自分のサイトのURL
+            const xUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(siteUrl)}`;
+            
+            document.getElementById("btnXPost").href = xUrl;
+        
+            // 表示エリアを出現させる
+            document.getElementById("imageResultArea").style.display = "block";
+        }
     </script>
 </body>
 </html>
